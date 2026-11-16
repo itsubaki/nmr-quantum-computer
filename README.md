@@ -2,26 +2,6 @@
 
 A browser-based, two-spin teaching simulator for Nielsen & Chuang,
 *Quantum Computation and Quantum Information*, §7.7 (Nuclear magnetic resonance).
-The HTML/CSS follows the dark palette, panels, controls, and responsive layout of
-the companion harmonic-oscillator and optical-photon simulators.
-
-## Run locally
-
-Requires Python 3. No installation, external fonts, JavaScript dependencies, or build step is needed.
-
-```sh
-make run
-```
-
-Open <http://127.0.0.1:3004/>. Use `make run PORT=3014` if port 3004 is occupied.
-Keep the server running while using the page. ES modules require an HTTP server;
-opening `public/index.html` directly with `file://` is not supported.
-
-For numerical tests, use Node.js 18 or later:
-
-```sh
-make test
-```
 
 ## Experiments
 
