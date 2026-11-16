@@ -16,13 +16,13 @@
       between spins to build a CNOT, undo unwanted evolution, and read out an ensemble’s magnetization.</p>
 
     <div class="mode-switch" role="tablist" aria-label="Choose an NMR experiment">
-      <button id="tab-rf" role="tab" aria-selected="false" aria-controls="experiment" tabindex="-1" data-mode="rf"><span>01</span> RF rotation <small>§7.7.2</small></button>
-      <button id="tab-cnot" role="tab" aria-selected="true" aria-controls="experiment" tabindex="0" data-mode="cnot"><span>02</span> J-coupled CNOT <small>§7.7.3</small></button>
+      <button id="tab-rf" role="tab" aria-selected="true" aria-controls="experiment" tabindex="0" data-mode="rf"><span>01</span> RF rotation <small>§7.7.2</small></button>
+      <button id="tab-cnot" role="tab" aria-selected="false" aria-controls="experiment" tabindex="-1" data-mode="cnot"><span>02</span> J-coupled CNOT <small>§7.7.3</small></button>
       <button id="tab-echo" role="tab" aria-selected="false" aria-controls="experiment" tabindex="-1" data-mode="echo"><span>03</span> Refocusing <small>§7.7.3</small></button>
       <button id="tab-fid" role="tab" aria-selected="false" aria-controls="experiment" tabindex="-1" data-mode="fid"><span>04</span> NMR readout <small>§7.7.2</small></button>
     </div>
 
-    <div id="experiment" role="tabpanel" aria-labelledby="tab-cnot">
+    <div id="experiment" role="tabpanel" aria-labelledby="tab-rf">
       <div class="grid">
         <section class="panel control" aria-labelledby="settings-title">
           <div class="section-heading"><h2 id="settings-title">Simulation Settings</h2><span class="badge">2 SPINS</span></div>

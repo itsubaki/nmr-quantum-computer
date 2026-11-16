@@ -13,7 +13,7 @@ const modes = {
   echo: { max: 0.02, value: 0.01, input: 'plus0', stages: ['Input', 'First wait', 'First π', 'Second wait', 'Final π'], defaults: [0, 0.005, 0.01] },
   fid: { max: 0.08, value: 0, input: '00', stages: ['Input', 'After read pulse', 'Acquisition'], defaults: [0, 0.02, 0.04] }
 };
-let mode = 'cnot', stage = 3, playing = false, lastFrame = null, animation;
+let mode = 'rf', stage = 1, playing = false, lastFrame = null, animation;
 const number = id => Number($(id).value);
 const tidy = (n, digits = 3) => Math.abs(n) < 0.5 * 10 ** -digits ? (0).toFixed(digits) : n.toFixed(digits);
 function complexText([re, im]) {
@@ -300,4 +300,4 @@ $('reset').addEventListener('click', () => {
 let resizeFrame;
 window.addEventListener('resize', () => { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(render); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
-setMode('cnot');
+setMode(mode);
