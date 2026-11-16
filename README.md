@@ -12,8 +12,6 @@ A browser-based, two-spin teaching simulator for Nielsen & Chuang,
 | Refocusing | Offset of A, wait time, pulses on/off; recovery of the input | §7.7.3, refocusing |
 | NMR readout | Read pulse, J, offset, acquisition time, T2; FID and phase-sensitive spectrum | §7.7.2, magnetization readout and decoherence |
 
-The interface uses English to match the companion simulators.
-
 Suggested walkthrough:
 
 1. In **J-coupled CNOT**, keep input `|+0⟩` and choose the CNOT time. Populations
