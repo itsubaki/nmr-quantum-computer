@@ -125,11 +125,3 @@ deviation option is disabled.
 The full apparatus, labeling, tomography reconstruction, quantum search,
 relaxation during gates, imperfect selectivity, and pulse calibration are outside
 this model. This is a teaching simulator, not spectrometer control software.
-
-## 日本語
-
-ニールセン＆チャンの7.7節にある核スピンの回転、J結合によるCNOT、
-リフォーカシング、NMR信号の読み出しを、2量子ビットの密度行列で計算します。
-既存の調和振動子・光子シミュレータと配色やレイアウトをそろえています。
-`make run` で起動し、上記のローカルURLを開いてください。
-擬純粋状態の「偏差を拡大した表示」と実際の状態を区別して観察できます。
