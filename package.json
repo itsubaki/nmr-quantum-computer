@@ -1,0 +1,9 @@
+{
+  "name": "nmr-quantum-computer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 3004 --bind 127.0.0.1 --directory public",
+    "test": "node --test"
+  }
+}

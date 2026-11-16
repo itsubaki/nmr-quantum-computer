@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore Nielsen & Chuang §7.7: RF spin rotations, J-coupled CNOT, refocusing, and NMR free induction decay with two-spin density matrices.">
+  <title>Nuclear Magnetic Resonance Simulator for Quantum Computation</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b1019'/%3E%3Cellipse cx='16' cy='16' rx='12' ry='5' fill='none' stroke='%236facfa'/%3E%3Cpath d='M16 28V5m-4 5 4-5 4 5' fill='none' stroke='%236bd9ad' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css?v=1">
+</head>
+<body>
+  <main>
+    <div class="eyebrow">NIELSEN–CHUANG; QUANTUM COMPUTATION AND QUANTUM INFORMATION §7.7</div>
+    <h1>Nuclear Magnetic Resonance Simulator for Quantum Computation</h1>
+    <p class="intro">Encode two qubits in <strong>nuclear spins</strong>. Use radiofrequency pulses and the interaction
+      between spins to build a CNOT, undo unwanted evolution, and read out an ensemble’s magnetization.</p>
+
+    <div class="mode-switch" role="tablist" aria-label="Choose an NMR experiment">
+      <button id="tab-rf" role="tab" aria-selected="false" aria-controls="experiment" tabindex="-1" data-mode="rf"><span>01</span> RF rotation <small>§7.7.2</small></button>
+      <button id="tab-cnot" role="tab" aria-selected="true" aria-controls="experiment" tabindex="0" data-mode="cnot"><span>02</span> J-coupled CNOT <small>§7.7.3</small></button>
+      <button id="tab-echo" role="tab" aria-selected="false" aria-controls="experiment" tabindex="-1" data-mode="echo"><span>03</span> Refocusing <small>§7.7.3</small></button>
+      <button id="tab-fid" role="tab" aria-selected="false" aria-controls="experiment" tabindex="-1" data-mode="fid"><span>04</span> NMR readout <small>§7.7.2</small></button>
+    </div>
+
+    <div id="experiment" role="tabpanel" aria-labelledby="tab-cnot">
+      <div class="grid">
+        <section class="panel control" aria-labelledby="settings-title">
+          <div class="section-heading"><h2 id="settings-title">Simulation Settings</h2><span class="badge">2 SPINS</span></div>
+          <label for="input">Input component |ψ⟩
+            <select id="input">
+              <option value="plus0">|+0⟩&#8194;Superposition on A</option>
+              <option value="00">|00⟩&#8194;Both spins up</option>
+              <option value="01">|01⟩</option>
+              <option value="10">|10⟩&#8194;Flip the target</option>
+              <option value="11">|11⟩&#8194;Reverse the flip</option>
+              <option value="plusplus">|++⟩&#8194;Both transverse</option>
+            </select>
+          </label>
+          <label for="preparation">State preparation
+            <select id="preparation">
+              <option value="1">Pure&#8194;ε = 1 (ideal reference)</option>
+              <option value="0.1">Pseudopure&#8194;ε = 0.1 (illustrative)</option>
+              <option value="0.00001">Pseudopure&#8194;ε = 10⁻⁵ (small signal)</option>
+              <option value="0">Maximally mixed&#8194;ε = 0</option>
+            </select>
+          </label>
+          <div class="slider-group">
+            <label class="time" for="progress"><span id="progress-label">J evolution t / t₍CNOT₎</span><output id="progress-value" for="progress">1.00</output></label>
+            <input id="progress" type="range" min="0" max="2" step="any" value="1">
+            <div class="time" id="progress-ticks" aria-hidden="true"><span>0</span><span>1 · CNOT</span><span>2</span></div>
+          </div>
+          <div class="row presets"><button id="zero">t = 0</button><button id="half">t = t₍CNOT₎/2</button><button id="ideal" class="primary">t = t₍CNOT₎</button></div>
+
+          <div id="rf-settings" class="mode-settings" hidden>
+            <label for="phase">RF phase φ<select id="phase"><option value="0">0&#8194;+x</option><option value="1.5707963267948966">π/2&#8194;+y</option><option value="3.141592653589793">π&#8194;−x</option><option value="4.71238898038469">3π/2&#8194;−y</option></select></label>
+            <div><label class="time" for="detuning"><span>Detuning Δ / Ω</span><output id="detuning-value" for="detuning">0.00</output></label><input id="detuning" type="range" min="-2" max="2" step="0.01" value="0"></div>
+          </div>
+          <div id="j-settings" class="mode-settings">
+            <label class="time" for="j"><span>J coupling / Hz</span><output id="j-value" for="j">215</output></label>
+            <input id="j" type="range" min="10" max="300" step="1" value="215">
+          </div>
+          <div id="offset-settings" class="mode-settings" hidden>
+            <label class="time" for="offset"><span>Spin A offset δ / Hz</span><output id="offset-value" for="offset">100</output></label>
+            <input id="offset" type="range" min="-300" max="300" step="1" value="100">
+          </div>
+          <label id="echo-settings" class="check" hidden><input id="echo" type="checkbox" checked> Apply refocusing π pulses on A</label>
+          <div id="fid-settings" class="mode-settings" hidden>
+            <label class="time" for="t2"><span>Transverse decay T₂ / ms</span><output id="t2-value" for="t2">40</output></label>
+            <input id="t2" type="range" min="5" max="150" step="1" value="40">
+            <label for="read-pulse">Readout preparation<select id="read-pulse"><option value="y">Rᴀy(π/2)&#8194;Tip A into the xy plane</option><option value="none">No pulse&#8194;Observe input directly</option></select></label>
+          </div>
+          <button id="play" aria-pressed="false">▶ Sweep evolution</button>
+          <button id="reset" class="text-button">Reset this experiment</button>
+          <div class="math" id="equations"></div>
+          <p id="control-note" class="muted"></p>
+          <div id="error" role="alert"></div>
+        </section>
+
+        <section class="panel experiment-view" aria-labelledby="sequence-title">
+          <div class="section-heading"><h2 id="sequence-title">Pulse Sequence</h2><span class="badge green">A: ¹H · B: ¹³C</span></div>
+          <div class="stats">
+            <div class="stat"><small id="fidelity-label">Overlap with ideal CNOT output</small><strong id="fidelity" class="good">—</strong></div>
+            <div class="stat"><small>State purity · Tr(ρ²)</small><strong id="purity">—</strong></div>
+            <div class="stat"><small id="elapsed-label">J evolution time</small><strong id="elapsed">—</strong></div>
+          </div>
+          <div id="circuit" class="circuit-wrap"></div>
+          <div class="stages" id="stages" role="group" aria-label="Choose an observation point"></div>
+          <p id="circuit-caption" class="muted circuit-caption"></p>
+          <div class="state-heading"><span id="bloch-label" class="muted">Reduced Bloch vectors · actual state</span><span id="stage-name" class="stage-label">Output</span></div>
+          <div class="bloch-pair"><div id="bloch-a"></div><div id="bloch-b"></div></div>
+          <p class="muted" id="bloch-note"></p>
+        </section>
+      </div>
+
+      <div id="readout-plots" class="two" hidden>
+        <section class="panel"><div class="section-heading"><h2>Free Induction Decay</h2><span class="badge">SPIN A</span></div>
+          <canvas id="fid-chart" role="img" aria-label="Real and imaginary transverse magnetization over acquisition time"></canvas>
+          <div class="legend"><span><i class="dot" style="background:var(--green)"></i>Re S / ε</span><span><i class="dot" style="background:var(--accent)"></i>Im S / ε</span><span><i class="dot" style="background:var(--orange)"></i>Observation time</span></div>
+          <p class="muted">S = ⟨Xᴀ⟩ + i⟨Yᴀ⟩. Signals are divided by ε to reveal the small ensemble signal; ε = 0 gives no signal.</p>
+        </section>
+        <section class="panel"><div class="section-heading"><h2>NMR Spectrum</h2><span class="badge">ANALYTIC FOURIER TRANSFORM</span></div>
+          <canvas id="spectrum-chart" role="img" aria-label="Absorptive and dispersive NMR spectrum against frequency offset in Hz"></canvas>
+          <div class="legend"><span><i class="dot" style="background:var(--green)"></i>Absorptive · Re</span><span><i class="dot" style="background:var(--violet)"></i>Dispersive · Im</span></div>
+          <p id="spectrum-note" class="muted"></p>
+        </section>
+      </div>
+
+      <div class="two">
+        <section class="panel" aria-labelledby="prob-title"><h2 id="prob-title">Computational-Basis Populations</h2><div id="probability-bars"></div>
+          <p class="muted">Diagonal entries of the actual density matrix. These are theoretical projective probabilities; an NMR receiver measures transverse ensemble magnetization.</p>
+        </section>
+        <section class="panel" aria-labelledby="density-title">
+          <div class="section-heading"><h2 id="density-title">Density Matrix</h2><select id="matrix-view" aria-label="Density matrix representation"><option value="actual">Actual ρ</option><option value="deviation">(ρ − I/4) / ε</option></select></div>
+          <div class="matrix-scroll"><div id="density-matrix" role="table" aria-label="Complex density matrix in computational basis"></div></div>
+          <p class="muted" id="matrix-note">Each cell shows its real and imaginary parts. Color indicates the real part: blue positive, violet negative.</p>
+        </section>
+      </div>
+
+      <details class="panel theory">
+        <summary>Spins, pulses &amp; equations <span>Model notes ↗</span></summary>
+        <div class="theory-grid">
+          <div><h3>01 / Two nuclear spins · §7.7.1–2</h3><p>A is the first bit (control, ¹H); B is the second bit (target, ¹³C). |0⟩ and |1⟩ are Z eigenstates with eigenvalues +1 and −1. We use a rotating frame for each spin and the weak-coupling, liquid-state approximation. J = 215 Hz is the proton–carbon coupling discussed in §7.7.4.</p><div class="formula">H<sub>free</sub>/ℏ = πδᴀZᴀ + πδʙZʙ + (πJ/2) ZᴀZʙ<br>U(t) = exp(−iHt/ℏ)</div><p>J and δ are ordinary frequencies in Hz, not angular frequencies. δʙ = 0 here. During ideal RF pulses, free evolution is neglected. Dipolar coupling is averaged away.</p></div>
+          <div><h3>02 / Rotations &amp; CNOT · §7.7.2–3</h3><div class="formula">H<sub>RF</sub>/ℏ = [ΔZ + Ω(cos φ X + sin φ Y)] / 2<br>R<sub>n</sub>(θ) = exp(−iθ n·σ/2)<br>U<sub>ZZ</sub>(t) = exp(−iπJt ZᴀZʙ/2)<br>t<sub>CNOT</sub> = 1/(2J)</div><p>Hʙ → U<sub>ZZ</sub> → Rᴀz(−π/2)Rʙz(−π/2) → Hʙ gives CNOT at t<sub>CNOT</sub>, up to global phase. A Hadamard can be compiled as H ∝ R<sub>y</sub>(π/2)R<sub>z</sub>(π). Z rotations are ideal phase-frame changes. The local corrections are fixed as t varies.</p></div>
+          <div><h3>03 / Refocusing &amp; state preparation · §7.7.3</h3><div class="formula">U<sub>echo</sub> = Rᴀx(π) U(t/2) Rᴀx(π) U(t/2)<br>ρ = (1 − ε) I/4 + ε|ψ⟩⟨ψ|</div><p>Conjugating Zᴀ and ZᴀZʙ with an X pulse reverses their signs. Two π pulses cancel both terms here, up to global phase; a nonzero Zʙ term would survive. Turn the pulses off to compare ordinary precession.</p><p>Pseudopure states are supplied as prepared inputs. Temporal/spatial labeling is not simulated. ε = 10⁻⁵ illustrates signal suppression; it is not calculated from a particular field or temperature. The full state is mixed even when its deviation resembles a pure-state calculation. For |+0⟩ at the ideal CNOT output, this family is entangled only if ε &gt; 1/3.</p></div>
+          <div><h3>04 / Ensemble readout · §7.7.2, §7.7.4</h3><div class="formula">S(t) = Tr[ρ(t)(Xᴀ + iYᴀ)]<br>S(t) = e<sup>−t/T₂</sup> ∑ a<sub>k</sub> e<sup>i2πfₖt</sup><br>fₖ = δᴀ ± J/2 · FWHM = 1/(πT₂)</div><p>The receiver uses S = ⟨X⟩ + i⟨Y⟩, a quadrature convention differing from Eq. (7.143) by phase and conjugation. Each line is weighted by a single-spin coherence; a line can be absent. The spectrum is the analytic infinite-time transform with exp(−i2πft), divided by εT₂, not an FFT of the displayed window.</p><p>Independent pure dephasing acts on both spins during readout; T₁ is infinite in this model. Matrix entries are computed directly, not reconstructed from a tomography experiment. The overlap F = ⟨ψ<sub>ideal</sub>|ρ|ψ<sub>ideal</sub>⟩ compares with a pure ideal output for this input, not a process fidelity.</p></div>
+        </div>
+      </details>
+    </div>
+    <p class="note"><strong>Model scope:</strong> This is a two-spin teaching model of Nielsen &amp; Chuang §7.7, not a full NMR spectrometer. Ideal selective pulses and a weak ZZ coupling are assumed; gate modes exclude relaxation and RF imperfections. Liquid-state NMR uses highly mixed ensembles with small detectable deviations. A pseudopure signal does not by itself demonstrate entanglement or scalable quantum computation. Full labeling protocols, tomography, and the quantum-search experiment of §7.7.4 are not implemented.</p>
+  </main>
+  <script type="module" src="./app.js?v=1"></script>
+</body>
+</html>
