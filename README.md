@@ -113,15 +113,3 @@ FID window. The real and imaginary parts give absorptive and dispersive lines;
 the absorptive full width at half maximum is `1/(π T2)`. A transition with zero
 coherence has no visible line. For ε = 0 all signals are zero, and the expanded
 deviation option is disabled.
-
-## Implementation and validation
-
-- `public/nmr.js`: dependency-free complex linear algebra and two-spin physics.
-- `public/app.js`: controls, pulse sequences, Bloch spheres, matrices, and plots.
-- `public/styles.css`: responsive styling shared in spirit with the companion projects.
-- `tests/nmr.test.js`: 17 numerical tests covering complex CNOT coherences,
-  Rabi oscillations, pseudopure states, refocusing, dephasing, and readout.
-
-The full apparatus, labeling, tomography reconstruction, quantum search,
-relaxation during gates, imperfect selectivity, and pulse calibration are outside
-this model. This is a teaching simulator, not spectrometer control software.
