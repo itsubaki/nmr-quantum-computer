@@ -17,6 +17,8 @@ Suggested walkthrough:
 1. In **J-coupled CNOT**, keep input `|+0⟩` and choose the CNOT time. Populations
    are 50% `|00⟩` and 50% `|11⟩`, with an off-diagonal coherence of 0.5. Each
    reduced Bloch vector vanishes, as expected for the Bell state.
+   Choose `|−0⟩` for the minus Bell state `(|00⟩ − |11⟩)/√2` in Figure 7.19;
+   the expanded deviation's off-diagonal coherences are then −0.5.
 2. Select a pseudopure preparation. Compare **Actual ρ** with **(ρ − I/4)/ε**.
    The latter also expands the Bloch vectors, but populations and the overlap
    always describe the actual state.
@@ -27,6 +29,13 @@ Suggested walkthrough:
 5. In **NMR readout**, `|00⟩` with a y read pulse gives one conditional line.
    Select `|++⟩` and no read pulse for a doublet separated by J. A longitudinal
    input without a read pulse gives no signal.
+
+Choose **Display → 3D bars** in the density matrix panel for a textbook-style
+bar chart, and select the real or imaginary component. To compare with the
+textbook's deviation matrices, choose **(ρ − I/4)/ε** and **Re**.
+The height scale stays fixed at −1 to +1; negative entries extend below zero.
+Hover over a bar for its row, column, and value. Choose **Numbers** to return
+to the complex-valued table.
 
 ## Model and conventions
 

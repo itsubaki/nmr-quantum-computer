@@ -2,7 +2,8 @@ import {
   inputVector, density, transform, transformVector, onSpin, rotation, rfUnitary,
   cnotStages, cnotVector, refocusStages, readoutState, spectralLines, spectrumAt,
   fidAt, populations, purity, fidelityWithPure, bloch, magnitude
-} from './nmr.js?v=1';
+} from './nmr.js?v=2';
+import { matrixBarSvg } from './matrix-bars.js?v=2';
 
 const $ = id => document.getElementById(id);
 const colors = { green: '#6bd9ad', blue: '#6facfa', violet: '#b59afa', orange: '#ffbf77', muted: '#a1b1c6' };
@@ -134,7 +135,10 @@ function drawCircuit({ t, j }) {
   if (mode === 'cnot') {
     drawing = gate(145, yB, 'H') + joint(278, 'J coupling', `${(t / (2 * j) * 1000).toFixed(3)} ms`) + gate(410, yA, 'Z −π/2', 88) + gate(410, yB, 'Z −π/2', 88) + gate(513, yB, 'H');
     markers = [83, 190, 353, 571];
-    caption = `At t = 1/(2J) = ${(1000 / (2 * j)).toFixed(3)} ms, the complete sequence is CNOT up to global phase. The pure component |+0⟩ becomes (|00⟩ + |11⟩)/√2.`;
+    const bellCaption = $('input').value === 'minus0'
+      ? ' The pure component |−0⟩ becomes (|00⟩ − |11⟩)/√2, the Bell state in textbook Figure 7.19.'
+      : $('input').value === 'plus0' ? ' The pure component |+0⟩ becomes (|00⟩ + |11⟩)/√2.' : '';
+    caption = `At t = 1/(2J) = ${(1000 / (2 * j)).toFixed(3)} ms, the complete sequence is CNOT up to global phase.${bellCaption}`;
   } else if (mode === 'rf') {
     drawing = gate(300, yA, `RF · ${(t / Math.PI).toFixed(2)}π`, 180) + '<text x="300" y="155" text-anchor="middle" class="svg-small">B is not driven · coupling neglected during pulse</text>';
     markers = [120, 530];
@@ -164,7 +168,7 @@ function renderBloch({ rho, epsilon }) {
     const length = Math.hypot(...v);
     $(`bloch-${spin === 0 ? 'a' : 'b'}`).innerHTML = `<svg viewBox="0 0 260 196" role="img" aria-label="Spin ${spin === 0 ? 'A' : 'B'} ${normalized ? 'expanded' : 'actual'} Bloch vector: x ${tidy(v[0])}, y ${tidy(v[1])}, z ${tidy(v[2])}"><defs><marker id="arrow-${spin}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${color}"/></marker></defs><circle cx="130" cy="90" r="60" fill="#0d1725" stroke="#32465d"/><ellipse cx="130" cy="90" rx="60" ry="17" fill="none" stroke="#32465d" stroke-dasharray="3 3"/><ellipse cx="130" cy="90" rx="23" ry="60" fill="none" stroke="#25384d"/>${axis([1.16, 0, 0], 'x')}${axis([0, 1.6, 0], 'y')}${axis([0, 0, 1.15], '|0⟩')}<text x="136" y="163" class="svg-small">|1⟩</text>${length > 0.012 ? `<path d="M130 90L${vx} ${vy}" stroke="${color}" stroke-width="2.5" marker-end="url(#arrow-${spin})"/>` : ''}<circle cx="${vx}" cy="${vy}" r="4" fill="${color}"/><text x="12" y="20" class="svg-label">${spin === 0 ? 'A · ¹H' : 'B · ¹³C'}</text><text x="130" y="186" text-anchor="middle" class="svg-small">(${v.map(n => tidy(n, 2)).join(', ')}) · |r${normalized ? '/ε' : ''}| = ${tidy(length)}</text></svg>`;
   });
-  $('bloch-note').textContent = mode === 'cnot' && $('input').value === 'plus0' ? 'At the ideal Bell output, both reduced Bloch vectors vanish. The two-spin correlations remain visible as off-diagonal entries of the density matrix.' : 'A sphere shows one spin’s reduced state. A short vector indicates a mixed reduced state; the two-spin state can still have correlations.';
+  $('bloch-note').textContent = mode === 'cnot' && ['plus0', 'minus0'].includes($('input').value) ? 'At the ideal Bell output, both reduced Bloch vectors vanish. The two-spin correlations remain visible as off-diagonal entries of the density matrix.' : 'A sphere shows one spin’s reduced state. A short vector indicates a mixed reduced state; the two-spin state can still have correlations.';
 }
 
 function renderPopulations(rho) {
@@ -179,7 +183,17 @@ function renderMatrix({ rho, epsilon }) {
   const matrix = rho.map((row, i) => row.map((a, k) => deviation ? [(a[0] - (i === k ? 0.25 : 0)) / epsilon, a[1] / epsilon] : a));
   const max = Math.max(0.25, ...matrix.flat().map(a => magnitude(a)));
   $('density-matrix').innerHTML = `<div class="matrix-row" role="row"><span role="columnheader"></span>${basis.map(b => `<span class="matrix-label" role="columnheader">|${b}⟩</span>`).join('')}</div>${matrix.map((row, i) => `<div class="matrix-row" role="row"><span class="matrix-label" role="rowheader">⟨${basis[i]}|</span>${row.map((a, k) => `<span role="cell" class="matrix-cell" style="background:rgba(${a[0] >= 0 ? '70,139,203' : '151,115,217'},${0.04 + 0.42 * Math.abs(a[0]) / max})" title="${deviation ? 'Expanded deviation' : 'ρ'}[${basis[i]},${basis[k]}] = ${complexText(a)}">${complexText(a)}</span>`).join('')}</div>`).join('')}`;
-  $('matrix-note').textContent = deviation ? 'Expanded deviation (ρ − I/4)/ε, with zero trace. This is not a normalized density matrix. Bloch vectors above are also divided by ε. Populations and overlap still use the actual ρ.' : `Actual ρ, with trace 1. Entries show real and imaginary parts; blue is positive real, violet negative real. ε = ${epsilon === 0.00001 ? '10⁻⁵' : epsilon}.`;
+  const bars = $('matrix-format').value === 'bars';
+  $('matrix-bars').hidden = !bars;
+  $('matrix-table').classList.toggle('visually-hidden', bars);
+  $('matrix-component-control').hidden = !bars;
+  if (bars) {
+    const imaginary = $('matrix-component').value === 'imaginary';
+    $('matrix-chart').innerHTML = matrixBarSvg(matrix, imaginary ? 1 : 0, deviation ? '(ρ − I/4)/ε' : 'ρ');
+    $('matrix-chart-caption').textContent = `${imaginary ? 'Imaginary' : 'Real'} part · fixed height scale −1 to +1. Rows and columns follow |00⟩, |01⟩, |10⟩, |11⟩. Hover over a bar for its value.`;
+  }
+  const representationNote = deviation ? 'Expanded deviation (ρ − I/4)/ε, with zero trace. This is not a normalized density matrix. Bloch vectors above are also divided by ε. Populations and overlap still use the actual ρ.' : `Actual ρ, with trace 1. ε = ${epsilon === 0.00001 ? '10⁻⁵' : epsilon}.`;
+  $('matrix-note').textContent = `${representationNote} ${bars ? 'Bar height shows the selected component; bars below zero are negative. Values are calculated from the model, not reconstructed from experimental tomography.' : 'Entries show real and imaginary parts; blue is positive real, violet negative real.'}`;
 }
 
 function linePlot(id, { xMin, xMax, yMax = 1, xLabel, ticks, series, marker, verticals = [] }) {
@@ -282,7 +296,7 @@ $('stages').addEventListener('click', event => {
   if (!button) return;
   stop(); stage = Number(button.dataset.stage); render();
 });
-['input', 'preparation', 'progress', 'phase', 'detuning', 'j', 'offset', 'echo', 't2', 'read-pulse', 'matrix-view'].forEach(id => {
+['input', 'preparation', 'progress', 'phase', 'detuning', 'j', 'offset', 'echo', 't2', 'read-pulse', 'matrix-view', 'matrix-format', 'matrix-component'].forEach(id => {
   $(id).addEventListener(['SELECT', 'INPUT'].includes($(id).tagName) && $(id).type !== 'checkbox' ? 'input' : 'change', () => {
     stop();
     if (id === 'preparation' && number('preparation') === 0) $('matrix-view').value = 'actual';

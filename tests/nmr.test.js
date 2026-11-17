@@ -54,12 +54,19 @@ test('CNOT preserves relative phases for complex superpositions and all polariza
   }
 });
 
-test('|+0> produces Bell coherences, not only the correct populations', () => {
-  const result = cnotStages(state('plus0')).at(-1);
-  near(result[0][0][0], 0.5); near(result[3][3][0], 0.5);
-  near(result[0][3][0], 0.5); near(result[0][3][1], 0);
-  [0, 1].forEach(spin => bloch(result, spin).forEach(v => near(v, 0)));
-  near(purity(result), 1);
+test('|+0> and |-0> produce Bell coherences with the correct relative sign', () => {
+  for (const [input, sign] of [['plus0', 1], ['minus0', -1]]) {
+    for (const epsilon of [1, 0.1, 1e-5]) {
+      const result = cnotStages(state(input, epsilon)).at(-1);
+      const bell = [complex(Math.SQRT1_2), complex(), complex(), complex(sign * Math.SQRT1_2)];
+      matrixNear(result, density(bell, epsilon));
+      near(result[0][3][0] / epsilon, sign * 0.5);
+      near(result[3][0][0] / epsilon, sign * 0.5);
+      near(result[0][3][1], 0);
+      [0, 1].forEach(spin => bloch(result, spin).forEach(v => near(v, 0)));
+      near(purity(result), (1 + 3 * epsilon ** 2) / 4);
+    }
+  }
 });
 
 test('half CNOT delay has the expected Bell-output overlap', () => {

@@ -377,6 +377,22 @@ h1 { margin-top: 11px; max-width: 1000px; }
 .matrix-row > span { display: table-cell; vertical-align: middle; text-align: center; padding: 6px 3px; }
 .matrix-label { font-family: var(--math-font); font-size: 14px; color: var(--muted); }
 .matrix-cell { border: 1px solid #2a3a5144; border-radius: 5px; height: 35px; white-space: nowrap; }
+.matrix-controls { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; overflow-x: auto; margin-bottom: 12px; }
+.matrix-controls label { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+.matrix-controls select { width: auto; margin: 0; padding: 6px; font-size: 11px; }
+.matrix-controls > #matrix-view { margin-left: auto; flex-shrink: 0; }
+.matrix-controls [hidden], #matrix-bars[hidden] { display: none; }
+#matrix-bars { margin: 0; }
+#matrix-chart { background: #0d1725; border: 1px solid #29394d; border-radius: 10px; }
+#matrix-chart svg { width: 100%; max-height: 480px; display: block; }
+.matrix-chart-grid { fill: none; stroke: #3a4e65; stroke-width: .8; }
+.matrix-chart-grid text, .matrix-chart-labels { fill: var(--muted); stroke: none; font: 12px system-ui, sans-serif; }
+.matrix-chart-title { fill: var(--txt); font-size: 15px; }
+.matrix-bar polygon { stroke: #0d1725; stroke-width: .7; stroke-linejoin: round; }
+.matrix-bar:hover polygon { stroke: #eaf1f9; stroke-width: 1.2; }
+#matrix-bars figcaption { font-size: 11px; line-height: 1.7; color: var(--muted); margin-top: 10px; }
+#matrix-bars .legend { margin-bottom: 7px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 #readout-plots canvas { height: 245px; }
 #readout-plots .badge { font-size: 8px; }
 .theory { margin-top: 16px; }
@@ -393,6 +409,8 @@ a { color: var(--accent); text-underline-offset: 3px; }
     .mode-switch small { display: none; }
     .grid { grid-template-columns: 290px minmax(0, 1fr); }
     .stat strong { font-size: 20px; }
+    .matrix-controls { align-items: flex-end; gap: 8px; }
+    .matrix-controls label { flex-direction: column; align-items: flex-start; gap: 4px; }
 }
 @media (max-width: 800px) {
     .grid, .two { grid-template-columns: 1fr; }

@@ -32,6 +32,7 @@ export function inputVector(name) {
   const basis = { '00': 0, '01': 1, '10': 2, '11': 3 };
   if (name in basis) return Array.from({ length: 4 }, (_, i) => complex(i === basis[name] ? 1 : 0));
   if (name === 'plus0') return [complex(Math.SQRT1_2), complex(), complex(Math.SQRT1_2), complex()];
+  if (name === 'minus0') return [complex(Math.SQRT1_2), complex(), complex(-Math.SQRT1_2), complex()];
   if (name === 'plusplus') return Array.from({ length: 4 }, () => complex(0.5));
   throw new RangeError(`Unknown input state: ${name}`);
 }
